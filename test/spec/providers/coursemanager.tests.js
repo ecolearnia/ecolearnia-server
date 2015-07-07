@@ -2,7 +2,7 @@
 var expect = require('chai').expect;
 var sinon = require('sinon');
 
-var utils = require('../../../lib/utils/utils');
+var config = require('ecofyjs-config');
 
 
 // Library under test

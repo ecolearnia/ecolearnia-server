@@ -5,14 +5,14 @@ var sinon = require('sinon');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var utils = require('../../../lib/utils/utils');
+var config = require('ecofyjs-config');
 var DbUtils = require('../../../lib/utils/dbutils').DbUtils;
 
 
 // Library under test
 var provider = require('../../../lib/providers/defaultprovider');
 
-utils.loadConfig('./conf/test.conf.json');
+config.load('./config/test.conf.json');
 
 describe('DefaultProvider', function () {
 

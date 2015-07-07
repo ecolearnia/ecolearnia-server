@@ -2,13 +2,13 @@
 var expect = require('chai').expect;
 var sinon = require('sinon');
 
-var utils = require('../../../lib/utils/utils');
+var config = require('ecofyjs-config');
 
 
 // Library under test
 var HapiResource = require('../../../lib/utils/hapiresource').HapiResource;
 
-utils.loadConfig('./conf/test.conf.json');
+config.load('./config/test.conf.json');
 
 
 describe('HapiResource', function () {

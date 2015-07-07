@@ -1,8 +1,9 @@
 var Hapi = require("hapi");
-var utils = require('./lib/utils/utils');
+var config = require('ecofyjs-config');
 
-var port = utils.getConfigProperty('port');
-var logConf = utils.getConfigProperty('log');
+config.load('./config/el-server.conf.json');
+var port = config.get('port');
+var logConf = config.get('log');
 
 var server = new Hapi.Server();
 server.connection(
@@ -14,11 +15,10 @@ server.connection(
   );
 
 server.register([
-      { register: require("lout") },
       { register: require("./index"), options: { log: logConf} }
 ], function(err) {
     if (err) throw err;
     server.start(function() {
-        console.log("EcoLearnia server started @ " + server.info.uri);
+        console.log("EcoLearnia-Server started @ " + server.info.uri);
     });
 });
