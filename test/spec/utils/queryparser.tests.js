@@ -15,7 +15,7 @@ describe('QueryParser', function () {
 	
 		it('should do something', function () {
 
-			var ast = parser.parse('a=5 AND (b=1 OR c IN(1, 13, 13) OR d="test")');
+			var ast = parser.parse('uuid="asdf-asdf-asdf"  AND (b<=1 OR c IN(1, 13, 13) OR d="test" AND yz BETWEEN 1 AND 5) ');
 
 			console.log('AST: ' + JSON.stringify(ast,null, 2));
 			

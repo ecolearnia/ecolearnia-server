@@ -8,22 +8,33 @@
 'AND'                 return 'AND'
 'OR'                  return 'OR'
 'NOT'                 return 'NOT'
+'BETWEEN'             return 'BETWEEN'
 L?\"(\\.|[^\\"])*\"                    return 'STRING_LITERAL'
 '('                   return 'LPAREN'
 ')'                   return 'RPAREN'
-'='                   return 'EQ'
 '!='                  return 'NEQ'
+'>='                  return 'GE'
+'<='                  return 'LE'
+'='                   return 'EQ'
 '>'                   return 'GT'
-'>='                  return 'GEQT'
 '<'                   return 'LT'
-'<='                  return 'LEQT'
 'IN'                  return 'IN'
+'NIN'                 return 'NIN'
+'+'                   return 'PLUS'
+'-'                   return 'MINUS'
 ','                   return 'COMMA'
-[_a-zA-Z][_a-zA-Z0-9]{0,30}            return 'IDEN'
+[_a-zA-Z][_\.a-zA-Z0-9]{0,30}            return 'IDEN'
 <<EOF>>               return 'EOF'
 .                     return 'INVALID'
 
 /lex
+
+%left OR
+%left AND
+%right NOT
+%left NEQ EQ
+%left GT LE LT GE
+$left PLUS MINUS
 
 %start start
 %% /* language grammar */
@@ -68,6 +79,8 @@ boolean_primary
 predicate
 	: comparison_predicate
 	| in_predicate
+	| nin_predicate
+	| between_predicate
 	;
 
 comparison_predicate
@@ -89,15 +102,23 @@ comp_op
 	: EQ
 	| NEQ
 	| GT
-	| GEQT
+	| GE
 	| LT
-	| LEQT
+	| LE
 	;
 
 in_predicate
 	: IDEN IN in_predicate_value
 	{$$ = {
         	in: $3
+        	};
+        }
+    ;
+
+nin_predicate
+	: IDEN NIN in_predicate_value
+	{$$ = {
+        	nin: $3
         	};
         }
     ;
@@ -118,3 +139,15 @@ in_value_list_element
 	: value_expression
 		{$$ = $1;}
 	;
+
+between_predicate
+	: IDEN BETWEEN value_expression AND value_expression
+	{$$ = {
+        	between: {
+        		from: $3,
+        		to: $5
+        	}
+        	
+        	};
+        }
+    ;
