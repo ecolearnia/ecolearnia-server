@@ -4,12 +4,12 @@
 %%
 
 \s+                   /* skip whitespace */
-[0-9]+("."[0-9]+)?\b                return 'NUMBER'
+[0-9]+("."[0-9]+)?\b  return 'NUMBER'
 'AND'                 return 'AND'
 'OR'                  return 'OR'
 'NOT'                 return 'NOT'
 'BETWEEN'             return 'BETWEEN'
-L?\"(\\.|[^\\"])*\"                    return 'STRING_LITERAL'
+L?\"(\\.|[^\\"])*\"   return 'STRING_LITERAL'
 '('                   return 'LPAREN'
 ')'                   return 'RPAREN'
 '!='                  return 'NEQ'
@@ -47,7 +47,8 @@ start
 search_condition
     : search_condition OR boolean_term
         {$$ = {
-        	'or': [ $1, $3 ]
+        	op: 'or',
+        	args: [ $1, $3 ]
         	};
         }
     | boolean_term
@@ -57,7 +58,8 @@ boolean_term
 	: boolean_factor
 	| boolean_term AND boolean_factor
 		{$$ = {
-        	'and': [ $1, $3 ]
+			op: 'and',
+        	args: [ $1, $3 ]
         	};
         }
     ;
@@ -95,6 +97,7 @@ comparison_predicate
 
 value_expression
 	: NUMBER
+		 {$$ = Number(yytext);}
 	| STRING_LITERAL
 	;
 
@@ -110,7 +113,9 @@ comp_op
 in_predicate
 	: IDEN IN in_predicate_value
 	{$$ = {
-        	in: $3
+			var: $1,
+			op: 'in',
+        	val: $3
         	};
         }
     ;
@@ -118,7 +123,9 @@ in_predicate
 nin_predicate
 	: IDEN NIN in_predicate_value
 	{$$ = {
-        	nin: $3
+			var: $1,
+			op: 'nin',
+        	val: $3
         	};
         }
     ;
@@ -143,6 +150,7 @@ in_value_list_element
 between_predicate
 	: IDEN BETWEEN value_expression AND value_expression
 	{$$ = {
+			var: $1,
         	between: {
         		from: $3,
         		to: $5

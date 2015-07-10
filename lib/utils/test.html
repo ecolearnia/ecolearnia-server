@@ -1,0 +1,69 @@
+<html>
+
+<script src="queryparser.js"></script>
+
+<div id='output'>
+
+<script type="text/javascript">
+	var ast = parser.parse('x=1 AND a=1 AND b=2 AND c=3 OR (d=4 OR f="a" OR g=4 OR j=6)');
+	var output = document.getElementById("output");
+
+	flatternTermsAndFactors_(ast);
+	console.log(ast);
+
+	output.innerHTML = JSON.stringify(ast, null, 2);
+
+
+
+/**
+ * Current queryparser.jison generates a binary tree for 
+ * multiple consutive ORs and AND's.
+ * This methods falttens the deep binary three to one level with multiple
+ * children
+ *  
+ */
+function flatternTermsAndFactors_(node)
+{
+	var newCriteria = {};
+	if (node.args && node.args.length && node.args.length > 0)
+	{
+    	var idx = 0
+    	do
+    	{
+    		var increment = flatternTermsAndFactorsRecursive_(node, node.args[idx]);
+    		idx = idx + increment;
+    		console.log('-A-' + idx + '/' + node.args.length);
+    	} while(idx < node.args.length)
+    }
+
+    return node;
+}
+
+function flatternTermsAndFactorsRecursive_(parent, node)
+{
+	if (node.args && node.args.length && node.args.length > 0)
+	{
+    	//for(i=0; i < node.args.length; i++)
+    	var idx = 0
+    	do
+    	{
+    		var increment = flatternTermsAndFactorsRecursive_(node, node.args[idx]);
+    		idx = idx + increment;
+    		console.log('-B-' + idx + '/' + node.args.length);
+    	} while(idx < node.args.length)
+    }
+
+	if (node.op && parent.op && node.op === parent.op)
+	{
+console.log("* add to" + JSON.stringify(parent));
+		parent.args.splice.apply(parent.args, [0, 1].concat(node.args));
+		return 2; // two were inserted
+	}
+console.log("*inc 1");
+	return 1; // none were inserted
+}
+
+
+</script>
+</html>
+
