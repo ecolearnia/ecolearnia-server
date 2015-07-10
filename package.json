@@ -4,7 +4,8 @@
   "description": "Learning Platform",
   "main": "ecolearnia.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "make test",
+    "grammarc": "node ./node_modules/.bin/jison artifacts/queryparser.jison; mv queryparser.js lib/utils/"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
     "handlebars": "^3.0.0",
     "hapi": "^8.2.0",
     "hoek": "^2.11.0",
+    "jison": "^0.4.15",
     "joi": "^5.1.0",
     "lodash": "^3.2.0",
     "lout": "^6.1.0",
@@ -44,6 +46,7 @@
   },
   "devDependencies": {
     "chai": "^2.0.0",
+    "jison": "^0.4.15",
     "mocha": "^2.1.0",
     "should": "^5.0.0",
     "sinon": "^1.12.2"
