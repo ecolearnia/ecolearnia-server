@@ -9,6 +9,7 @@
 'OR'                  return 'OR'
 'NOT'                 return 'NOT'
 'BETWEEN'             return 'BETWEEN'
+'LIKE'                return 'LIKE'
 L?\"(\\.|[^\\"])*\"   return 'STRING_LITERAL'
 '('                   return 'LPAREN'
 ')'                   return 'RPAREN'
@@ -82,6 +83,7 @@ predicate
 	: comparison_predicate
 	| in_predicate
 	| nin_predicate
+	| like_predicate
 	| between_predicate
 	;
 
@@ -97,8 +99,9 @@ comparison_predicate
 
 value_expression
 	: NUMBER
-		 {$$ = Number(yytext);}
+		{$$ = Number(yytext);}
 	| STRING_LITERAL
+		{$$ = yytext.substring(1, yytext.length -1);}
 	;
 
 comp_op
@@ -146,6 +149,16 @@ in_value_list_element
 	: value_expression
 		{$$ = $1;}
 	;
+
+like_predicate
+	: IDEN LIKE value_expression
+	{$$ = {
+			var: $1,
+        	op: 'like',
+    		val: $3,        	
+        	};
+        }
+    ;
 
 between_predicate
 	: IDEN BETWEEN value_expression AND value_expression

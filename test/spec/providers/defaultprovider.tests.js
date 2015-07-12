@@ -28,6 +28,21 @@ describe('DefaultProvider', function () {
         data: { type: String }
 	});
 
+	var testResources = [
+			{
+				group: 1,
+				data: 'test-data1'
+			},
+			{
+				group: 1,
+				data: 'test-data2'
+			},
+			{
+				group: 2,
+				data: 'test-data3'
+			}
+		];
+
 	beforeEach(function () {
 		testProvider = provider.createProvider(
 			'TestFunctional',
@@ -61,6 +76,7 @@ describe('DefaultProvider', function () {
 				delete result['__v'];
 				delete result['_id'];
 
+				expect(result.uuid, 'uuid property not generated').to.not.null;
 				expect(result).to.deep.equal(resource);
 
 				delete_(testProvider, result.uuid);
@@ -72,51 +88,50 @@ describe('DefaultProvider', function () {
 		});	
 	});
 
-	describe('Read resource', function () {
+	var createdUuids = [];
 
-		var createdUuids = [];
+	beforeEach(function (done) {
+		// Create three for reading 
+		testProvider.add(testResources[0])
+		.then( function(model1) {
+			createdUuids.push(model1.uuid);
 
-		var resources = [
-			{
-				group: 1,
-				data: 'test-data1'
-			},
-			{
-				group: 1,
-				data: 'test-data2'
-			}
-		];
+			testProvider.add(testResources[1])
+			.then( function(model2) {
+				createdUuids.push(model2.uuid);
 
-		beforeEach(function (done) {
-			// Create two for reading 
-			testProvider.add(resources[0])
-			.then( function(model1) {
-				createdUuids.push(model1.uuid);
+				testProvider.add(testResources[2])
+				.then( function(model3) {
+					createdUuids.push(model3.uuid);
 
-				testProvider.add(resources[1])
-				.then( function(model2) {
-					createdUuids.push(model2.uuid);
 					done();
 				})
-				.catch( function(error) {
-					done(error);
-				});
 
 			})
-			.catch( function(error) {
-				done(error);
-			});
-		});
 
-		afterEach(function (done) {
-			deleteAllAndDone(testProvider, done);
+		})
+		.catch( function(error) {
+			done(error);
 		});
-	
+	});
+
+	afterEach(function (done) {
+		deleteAllAndDone(testProvider, done);
+	});
+
+	describe('Read resource', function () {
+
 		it('should find', function (done) {
-			testProvider.find({data: resources[1].data})
+			var criteria = {
+				op: '=',
+				var: 'data',
+				val: testResources[1].data
+			};
+
+			testProvider.find(criteria)
 			.then( function(model) {
 				expect(model, 'Model is null').to.not.null;
-				expect(model.data, 'Data does not match').to.equal(resources[1].data);
+				expect(model.data, 'Data does not match').to.equal(testResources[1].data);
 				done();
 			})
 			.catch( function(error) {
@@ -127,7 +142,7 @@ describe('DefaultProvider', function () {
 		it('should findByPK', function (done) {
 			testProvider.findByPK(createdUuids[0])
 			.then( function(model) {
-				expect(model.data).to.equal(resources[0].data);
+				expect(model.data).to.equal(testResources[0].data);
 				done();
 			})
 			.catch( function(error) {
@@ -136,9 +151,16 @@ describe('DefaultProvider', function () {
 		});
 
 		it('should query', function (done) {
-			testProvider.query({group: 1})
+
+			var criteria = {
+				op: '=',
+				var: 'group',
+				val: 1
+			};
+
+			testProvider.query(criteria)
 			.then( function(collection) {
-				expect(collection.length).to.equal(2);
+				expect(collection.length, 'Retireve').to.equal(2);
 				done();
 			})
 			.catch( function(error) {
@@ -174,7 +196,6 @@ describe('DefaultProvider', function () {
 				console.log('** ERROR on delete! **' +  JSON.stringify(error));
 				done(error);
 			});
-			
 		});
 
 		afterEach(function (done) {
@@ -183,12 +204,18 @@ describe('DefaultProvider', function () {
 	
 		it('should update', function (done) {
 
+			var criteria = {
+				op: '=',
+				var: 'group',
+				val: 2
+			};
+
 			var updateTo = {
 				group: 3,
 				data: 'test-data1-new'
 			}
 
-			testProvider.update({group: 2}, updateTo)
+			testProvider.update(criteria, updateTo)
 			.then( function(model2) {
 				testProvider.findByPK(resources[0].uuid)
 				.then( function(model2b) {
@@ -233,13 +260,50 @@ describe('DefaultProvider', function () {
 		});	
 	});
 
-	describe.skip('Delete resource', function () {	
+	describe('Delete resource', function () {	
 	
 		it('should remove', function (done) {
-			done();
+
+			var criteria = {
+				op: '=',
+				var: 'data',
+				val: testResources[0].data
+			};
+
+			testProvider.remove(criteria)
+			.then( function(removeResult) {
+
+				testProvider.find(criteria)
+				.then( function(resourceFound) {
+					expect(resourceFound, 'Resource was not deleted').to.null;
+					done();
+				})
+				.catch( function(error) {
+					done(error);
+				});
+			})
+			.catch( function(error) {
+				done(error);
+			});
 		});
+
 		it('should removeByPK', function (done) {
-			done();
+
+			testProvider.removeByPK(testResources[0].uuid)
+			.then( function(removeResult) {
+
+				testProvider.findByPK(testResources[0].uuid)
+				.then( function(resourceFound) {
+					expect(resourceFound, 'Resource was not deleted').to.null;
+					done();
+				})
+				.catch( function(error) {
+					done(error);
+				});
+			})
+			.catch( function(error) {
+				done(error);
+			});
 		});	
 	});
 
