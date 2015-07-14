@@ -160,7 +160,25 @@ describe('DefaultProvider', function () {
 
 			testProvider.query(criteria)
 			.then( function(collection) {
-				expect(collection.length, 'Retireve').to.equal(2);
+				expect(collection.length, 'Retrieve').to.equal(2);
+				done();
+			})
+			.catch( function(error) {
+				done(error);
+			});
+		});
+
+		it('should count', function (done) {
+
+			var criteria = {
+				op: '=',
+				var: 'group',
+				val: 1
+			};
+
+			testProvider.count(criteria)
+			.then( function(result) {
+				expect(result, 'Count').to.equal(2);
 				done();
 			})
 			.catch( function(error) {
